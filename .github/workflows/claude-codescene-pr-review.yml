@@ -77,4 +77,4 @@ jobs:
             --mcp-config /tmp/mcp-config.json
             --model claude-opus-4-6
             --max-turns 12
-            --allowedTools "Bash(gh pr comment:*),mcp__codescene__analyze_change_set,mcp__codescene__code_health_score,mcp__codescene__codescene_analyze_change_set,mcp__codescene__codescene_code_health_score"
+            --allowedTools "Bash(gh pr comment:*),mcp__codescene__analyze_change_set,mcp__codescene__code_health_score"
