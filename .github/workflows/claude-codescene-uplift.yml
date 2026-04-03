@@ -91,8 +91,10 @@ jobs:
             Required behavior:
             1) Use CodeScene MCP to analyze the PR change set against BASE BRANCH.
             2) Identify files with degraded code health and refactor those files to improve maintainability.
-            3) Re-check Code Health scores for changed files and include before/after metrics in one PR comment.
-            4) Commit and push the uplift changes to HEAD BRANCH.
+            3) Refactor in a loop: after each file change, run mcp__codescene__code_health_review again for that file.
+            4) Continue iterative refactoring until each targeted file reaches Code Health 10.0, or no further safe improvement is possible.
+            5) Include before/after Code Health metrics in one PR comment.
+            6) Commit and push the uplift changes to HEAD BRANCH.
 
             Constraints:
             - Keep changes focused on code health and maintainability.
@@ -102,4 +104,4 @@ jobs:
             --mcp-config /tmp/mcp-config.json
             --model claude-opus-4-6
             --max-turns 20
-            --allowedTools "Bash(git status:*),Bash(git diff:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),mcp__codescene__analyze_change_set,mcp__codescene__code_health_score,mcp__codescene__code_health_review"
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(git status:*),Bash(git diff:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),mcp__codescene__analyze_change_set,mcp__codescene__code_health_score,mcp__codescene__code_health_review"
