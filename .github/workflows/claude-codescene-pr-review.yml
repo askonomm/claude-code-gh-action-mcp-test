@@ -18,9 +18,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Preinstall CodeScene MCP
+      - name: Install CodeScene MCP binary
         run: |
-          npm install -g @codescene/codehealth-mcp@1.0.5
+          curl -fsSL -o /tmp/cs-mcp.zip "https://github.com/codescene-oss/codescene-mcp-server/releases/download/MCP-1.0.5/cs-mcp-linux-amd64.zip"
+          unzip -o /tmp/cs-mcp.zip -d /tmp
+          install -m 0755 /tmp/cs-mcp-linux-amd64 /usr/local/bin/cs-mcp
+          cs-mcp --help >/dev/null || true
 
       - name: Warm up CodeScene MCP binary download
         run: |
