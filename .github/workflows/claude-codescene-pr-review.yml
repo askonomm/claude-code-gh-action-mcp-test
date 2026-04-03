@@ -57,10 +57,10 @@ jobs:
             Perform only a CodeScene MCP code health review for this PR.
 
             Required behavior:
-            1) First call mcp__codescene__codescene_analyze_change_set with:
+            1) First call mcp__codescene__analyze_change_set with:
                - base_ref: ${{ github.base_ref }}
                - git_repository_path: ${{ github.workspace }}
-            2) For each degraded file returned by that tool, call mcp__codescene__codescene_code_health_score for that file.
+            2) For each degraded file returned by that tool, call mcp__codescene__code_health_score for that file.
             3) Include CodeScene metrics in the PR comment:
                - Overall change-set quality gate (passed/failed)
                - Per-file verdicts from the change-set analysis (improved/stable/degraded)
@@ -77,4 +77,4 @@ jobs:
             --mcp-config /tmp/mcp-config.json
             --model claude-opus-4-6
             --max-turns 12
-            --allowedTools "Bash(gh pr comment:*),mcp__codescene__codescene_analyze_change_set,mcp__codescene__codescene_code_health_score"
+            --allowedTools "Bash(gh pr comment:*),mcp__codescene__analyze_change_set,mcp__codescene__code_health_score,mcp__codescene__codescene_analyze_change_set,mcp__codescene__codescene_code_health_score"
