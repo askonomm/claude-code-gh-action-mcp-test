@@ -41,11 +41,20 @@ jobs:
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
+            BASE BRANCH: ${{ github.base_ref }}
 
-            Perform a CodeScene MCP code health review for the files changed in this pull request.
-            Use CodeScene MCP tools to identify code health degradations, maintainability risks, and technical debt signals.
-            Post one concise PR comment that summarizes findings and recommends concrete refactoring actions.
-            Do not ask follow-up questions. Finish within the current run.
+            Perform only a CodeScene MCP code health review for this PR.
+
+            Required behavior:
+            1) Use CodeScene MCP tools to analyze the change set against the base branch.
+            2) Summarize only code health degradations, maintainability risks, and technical debt findings.
+            3) Post exactly one concise PR comment with findings and concrete refactoring actions.
+
+            Constraints:
+            - Do not run unrelated checks.
+            - Do not ask follow-up questions.
+            - Do not iterate after posting the single summary comment.
           claude_args: |
             --mcp-config /tmp/mcp-config.json
-            --max-turns 20
+            --model claude-opus-4-6
+            --max-turns 30
