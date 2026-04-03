@@ -48,7 +48,7 @@ jobs:
             Required behavior:
             1) Use CodeScene MCP tools to analyze the change set against the base branch.
             2) Summarize only code health degradations, maintainability risks, and technical debt findings.
-            3) Post exactly one concise PR comment with findings and concrete refactoring actions.
+            3) Post exactly one concise PR comment with findings and concrete refactoring actions using: gh pr comment ${{ github.event.pull_request.number }} --body "...".
 
             Constraints:
             - Do not run unrelated checks.
@@ -58,3 +58,4 @@ jobs:
             --mcp-config /tmp/mcp-config.json
             --model claude-opus-4-6
             --max-turns 30
+            --allowedTools "Bash(gh pr comment:*)"
