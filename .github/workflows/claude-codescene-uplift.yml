@@ -88,24 +88,6 @@ jobs:
             sleep $((attempt * 5))
           done
 
-      - name: Create CodeScene MCP config
-        if: steps.pr.outputs.same_repo == 'true'
-        run: |
-          cat > /tmp/mcp-config.json <<'EOF'
-          {
-            "mcpServers": {
-              "codescene": {
-                "command": "cs-mcp",
-                "args": [],
-                "env": {
-                  "CS_ACCESS_TOKEN": "${{ secrets.CODESCENE_ACCESS_TOKEN }}",
-                  "CS_DISABLE_VERSION_CHECK": "1"
-                }
-              }
-            }
-          }
-          EOF
-
       - name: Run Claude Code uplift
         if: steps.pr.outputs.same_repo == 'true'
         uses: anthropics/claude-code-action@v1
@@ -114,6 +96,19 @@ jobs:
           track_progress: true
           use_sticky_comment: true
           show_full_output: true
+          settings: |
+            {
+              "mcpServers": {
+                "codescene": {
+                  "command": "cs-mcp",
+                  "args": [],
+                  "env": {
+                    "CS_ACCESS_TOKEN": "${{ secrets.CODESCENE_ACCESS_TOKEN }}",
+                    "CS_DISABLE_VERSION_CHECK": "1"
+                  }
+                }
+              }
+            }
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ steps.pr.outputs.pr_number }}
@@ -139,7 +134,6 @@ jobs:
             - If CodeScene MCP tools are unavailable in this run, post one PR comment saying "CodeScene MCP unavailable; uplift aborted" and stop.
             - If no code changes are needed, post one PR comment saying no uplift changes were required.
           claude_args: |
-            --mcp-config /tmp/mcp-config.json
             --model claude-opus-4-6
             --max-turns 20
             --allowedTools "Read,Edit,Write,Glob,Grep,Bash(git status:*),Bash(git diff:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),mcp__codescene__analyze_change_set,mcp__codescene__code_health_score,mcp__codescene__code_health_review"
