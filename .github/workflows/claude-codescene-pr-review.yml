@@ -18,14 +18,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Preinstall CodeScene MCP
+        run: |
+          npm install -g @codescene/codehealth-mcp@1.0.5
+
+      - name: Warm up CodeScene MCP binary download
+        run: |
+          timeout 45s cs-mcp >/tmp/cs-mcp-warmup.log 2>&1 || true
+
       - name: Create CodeScene MCP config
         run: |
           cat > /tmp/mcp-config.json <<'EOF'
           {
             "mcpServers": {
               "codescene": {
-                "command": "npx",
-                "args": ["-y", "@codescene/codehealth-mcp@latest"],
+                "command": "cs-mcp",
+                "args": [],
                 "env": {
                   "CS_ACCESS_TOKEN": "${{ secrets.CODESCENE_ACCESS_TOKEN }}",
                   "CS_DISABLE_VERSION_CHECK": "1"
