@@ -1,0 +1,50 @@
+name: Claude CodeScene PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Create CodeScene MCP config
+        run: |
+          cat > /tmp/mcp-config.json <<'EOF'
+          {
+            "mcpServers": {
+              "codescene": {
+                "command": "npx",
+                "args": ["@codescene/codehealth-mcp"],
+                "env": {
+                  "CS_ACCESS_TOKEN": "${{ secrets.CODESCENE_ACCESS_TOKEN }}"
+                }
+              }
+            }
+          }
+          EOF
+
+      - name: Run Claude Code review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Perform a CodeScene MCP code health review for the files changed in this pull request.
+            Use CodeScene MCP tools to identify code health degradations, maintainability risks, and technical debt signals.
+            Post one concise PR comment that summarizes findings and recommends concrete refactoring actions.
+          claude_args: |
+            --mcp-config /tmp/mcp-config.json
+            --max-turns 8
