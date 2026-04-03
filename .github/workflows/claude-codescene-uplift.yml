@@ -91,7 +91,8 @@ jobs:
             The user requested /uplift.
 
             Required behavior:
-            1) Use CodeScene MCP to analyze the PR change set against BASE BRANCH.
+            1) First, call mcp__codescene__analyze_change_set for this PR against BASE BRANCH.
+               This is a hard prerequisite for any code edits.
             2) Identify files with degraded code health and refactor those files to improve maintainability.
             3) Refactor in a loop: after each file change, run mcp__codescene__code_health_review again for that file.
             4) Continue iterative refactoring until each targeted file reaches Code Health 10.0, or no further safe improvement is possible.
@@ -101,6 +102,8 @@ jobs:
             Constraints:
             - Keep changes focused on code health and maintainability.
             - Do not change workflow files.
+            - Do not proceed with refactoring based on prior comments or assumptions.
+            - If CodeScene MCP tools are unavailable in this run, post one PR comment saying "CodeScene MCP unavailable; uplift aborted" and stop.
             - If no code changes are needed, post one PR comment saying no uplift changes were required.
           claude_args: |
             --mcp-config /tmp/mcp-config.json
