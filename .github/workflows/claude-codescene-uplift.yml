@@ -96,19 +96,6 @@ jobs:
           track_progress: true
           use_sticky_comment: true
           show_full_output: true
-          settings: |
-            {
-              "mcpServers": {
-                "codescene": {
-                  "command": "cs-mcp",
-                  "args": [],
-                  "env": {
-                    "CS_ACCESS_TOKEN": "${{ secrets.CODESCENE_ACCESS_TOKEN }}",
-                    "CS_DISABLE_VERSION_CHECK": "1"
-                  }
-                }
-              }
-            }
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ steps.pr.outputs.pr_number }}
@@ -136,4 +123,5 @@ jobs:
           claude_args: |
             --model claude-opus-4-6
             --max-turns 20
+            --mcp-config '{"mcpServers":{"codescene":{"command":"cs-mcp","args":[],"env":{"CS_ACCESS_TOKEN":"${{ secrets.CODESCENE_ACCESS_TOKEN }}","CS_DISABLE_VERSION_CHECK":"1"}}}}'
             --allowedTools "Read,Edit,Write,Glob,Grep,Bash(git status:*),Bash(git diff:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*),Bash(gh pr comment:*),mcp__codescene__analyze_change_set,mcp__codescene__code_health_score,mcp__codescene__code_health_review"

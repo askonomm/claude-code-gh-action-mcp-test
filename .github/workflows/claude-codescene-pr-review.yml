@@ -64,19 +64,6 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           show_full_output: true
-          settings: |
-            {
-              "mcpServers": {
-                "codescene": {
-                  "command": "cs-mcp",
-                  "args": [],
-                  "env": {
-                    "CS_ACCESS_TOKEN": "${{ secrets.CODESCENE_ACCESS_TOKEN }}",
-                    "CS_DISABLE_VERSION_CHECK": "1"
-                  }
-                }
-              }
-            }
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
@@ -105,4 +92,5 @@ jobs:
           claude_args: |
             --model claude-opus-4-6
             --max-turns 12
+            --mcp-config '{"mcpServers":{"codescene":{"command":"cs-mcp","args":[],"env":{"CS_ACCESS_TOKEN":"${{ secrets.CODESCENE_ACCESS_TOKEN }}","CS_DISABLE_VERSION_CHECK":"1"}}}}'
             --allowedTools "Bash(gh pr comment:*),mcp__codescene__analyze_change_set,mcp__codescene__code_health_score"
