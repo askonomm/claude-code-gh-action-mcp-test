@@ -45,6 +45,7 @@ jobs:
             Perform a CodeScene MCP code health review for the files changed in this pull request.
             Use CodeScene MCP tools to identify code health degradations, maintainability risks, and technical debt signals.
             Post one concise PR comment that summarizes findings and recommends concrete refactoring actions.
+            Do not ask follow-up questions. Finish within the current run.
           claude_args: |
             --mcp-config /tmp/mcp-config.json
-            --max-turns 8
+            --max-turns 20
