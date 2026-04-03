@@ -18,16 +18,46 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install CodeScene MCP binary
+      - name: Install CodeScene MCP binary with retries
         run: |
-          curl -fsSL -o /tmp/cs-mcp.zip "https://github.com/codescene-oss/codescene-mcp-server/releases/download/MCP-1.0.5/cs-mcp-linux-amd64.zip"
-          unzip -o /tmp/cs-mcp.zip -d /tmp
-          install -m 0755 /tmp/cs-mcp-linux-amd64 /usr/local/bin/cs-mcp
-          cs-mcp --help >/dev/null || true
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "Install attempt ${attempt}/3"
+            if curl -fsSL -o /tmp/cs-mcp.zip "https://github.com/codescene-oss/codescene-mcp-server/releases/download/MCP-1.0.5/cs-mcp-linux-amd64.zip"; then
+              unzip -o /tmp/cs-mcp.zip -d /tmp
+              install -m 0755 /tmp/cs-mcp-linux-amd64 /usr/local/bin/cs-mcp
+              if cs-mcp --help >/dev/null 2>&1; then
+                echo "CodeScene MCP binary installed successfully"
+                break
+              fi
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "Failed to install CodeScene MCP binary after 3 attempts" >&2
+              exit 1
+            fi
+            sleep $((attempt * 5))
+          done
 
-      - name: Warm up CodeScene MCP binary download
+      - name: Warm up CodeScene MCP with retries
         run: |
-          timeout 45s cs-mcp >/tmp/cs-mcp-warmup.log 2>&1 || true
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "Warmup attempt ${attempt}/3"
+            if timeout 45s cs-mcp >/tmp/cs-mcp-warmup.log 2>&1; then
+              echo "CodeScene MCP warmup completed"
+              break
+            fi
+            if grep -q "CodeScene MCP server started" /tmp/cs-mcp-warmup.log 2>/dev/null; then
+              echo "CodeScene MCP started during warmup timeout"
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "CodeScene MCP warmup failed after 3 attempts" >&2
+              cat /tmp/cs-mcp-warmup.log >&2 || true
+              exit 1
+            fi
+            sleep $((attempt * 5))
+          done
 
       - name: Create CodeScene MCP config
         run: |
