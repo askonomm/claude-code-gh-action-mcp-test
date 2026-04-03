@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Create CodeScene MCP config
         run: |
@@ -25,9 +25,10 @@ jobs:
             "mcpServers": {
               "codescene": {
                 "command": "npx",
-                "args": ["@codescene/codehealth-mcp"],
+                "args": ["-y", "@codescene/codehealth-mcp@latest"],
                 "env": {
-                  "CS_ACCESS_TOKEN": "${{ secrets.CODESCENE_ACCESS_TOKEN }}"
+                  "CS_ACCESS_TOKEN": "${{ secrets.CODESCENE_ACCESS_TOKEN }}",
+                  "CS_DISABLE_VERSION_CHECK": "1"
                 }
               }
             }
@@ -43,24 +44,29 @@ jobs:
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
             BASE BRANCH: ${{ github.base_ref }}
+            GIT REPOSITORY PATH: ${{ github.workspace }}
 
             Perform only a CodeScene MCP code health review for this PR.
 
             Required behavior:
-            1) Use CodeScene MCP tools to analyze the change set against the base branch.
-            2) Include CodeScene metrics in the PR comment:
+            1) First call mcp__codescene__codescene_analyze_change_set with:
+               - base_ref: ${{ github.base_ref }}
+               - git_repository_path: ${{ github.workspace }}
+            2) For each degraded file returned by that tool, call mcp__codescene__codescene_code_health_score for that file.
+            3) Include CodeScene metrics in the PR comment:
                - Overall change-set quality gate (passed/failed)
                - Per-file verdicts from the change-set analysis (improved/stable/degraded)
                - Numeric Code Health score for each degraded file
-            3) Summarize only code health degradations, maintainability risks, and technical debt findings.
-            4) Post exactly one concise PR comment with findings and concrete refactoring actions using: gh pr comment ${{ github.event.pull_request.number }} --body "...".
+            4) Summarize only code health degradations, maintainability risks, and technical debt findings.
+            5) Post exactly one concise PR comment with findings and concrete refactoring actions using: gh pr comment ${{ github.event.pull_request.number }} --body "...".
+            6) If CodeScene MCP tools are unavailable, post one short PR comment that states MCP was unavailable and stop.
 
             Constraints:
-            - Do not run unrelated checks.
+            - Do not run gh pr diff, gh pr view, or gh auth commands.
             - Do not ask follow-up questions.
             - Do not iterate after posting the single summary comment.
           claude_args: |
             --mcp-config /tmp/mcp-config.json
             --model claude-opus-4-6
-            --max-turns 30
+            --max-turns 12
             --allowedTools "Bash(gh pr comment:*),mcp__codescene__codescene_analyze_change_set,mcp__codescene__codescene_code_health_score"
